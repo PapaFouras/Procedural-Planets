@@ -7,17 +7,24 @@ public class Planet : MonoBehaviour
 
     [Range(2,256)]
     public int resolution = 10;
+    public bool autoUpdate = true;
+
+[HideInInspector]
+    public bool shapeSettingsFoldOut;
+    [HideInInspector]
+    public bool colourSettingsFoldOut;
+
+    public ShapeSettings shapeSettings;
+    public ColorSettings colourSettings;
+
+    ShapeGenerator shapeGenerator;
 
     [SerializeField,HideInInspector]
    MeshFilter[] meshFilters;
    TerrainFace[] terrainFaces;
 
-   private void OnValidate() {
-       Initialise();
-        GenerateMesh();
-   }
-
    void Initialise(){
+       shapeGenerator = new ShapeGenerator(shapeSettings);
        if(meshFilters == null || meshFilters.Length == 0){
            meshFilters = new MeshFilter[6];
        }
@@ -35,7 +42,7 @@ public class Planet : MonoBehaviour
            meshFilters[i].sharedMesh = new Mesh();
 
            }
-           terrainFaces[i] = new TerrainFace(meshFilters[i].sharedMesh,resolution,directions[i]);
+           terrainFaces[i] = new TerrainFace(shapeGenerator,meshFilters[i].sharedMesh,resolution,directions[i]);
           
        }
    }
@@ -46,5 +53,35 @@ public class Planet : MonoBehaviour
            face.ConstructMesh();
        }
    }
+
+    void GenerateColour(){
+        foreach(MeshFilter m in meshFilters){
+            m.GetComponent<MeshRenderer>().sharedMaterial.color = colourSettings.planetColor;
+
+        }
+    }
+
+    public void OnColourSettingsUpdated(){
+        if(autoUpdate){
+            Initialise();
+            GenerateColour();
+        }
+        
+    }
+
+    public void OnShapeSettingsUpdated(){
+        if(autoUpdate){
+            Initialise();
+            GenerateMesh();
+        }
+
+    }
+
+    public void GeneratePlanet(){
+        Initialise();
+        GenerateMesh();
+        GenerateColour();
+    }
+
 
 }
