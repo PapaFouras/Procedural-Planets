@@ -20,14 +20,17 @@ public class Planet : MonoBehaviour
     public ShapeSettings shapeSettings;
     public ColorSettings colourSettings;
 
-    ShapeGenerator shapeGenerator;
+    ShapeGenerator shapeGenerator = new ShapeGenerator();
+
+    ColourGenerator colourGenerator = new ColourGenerator();
 
     [SerializeField,HideInInspector]
    MeshFilter[] meshFilters;
    TerrainFace[] terrainFaces;
 
    void Initialise(){
-       shapeGenerator = new ShapeGenerator(shapeSettings);
+       shapeGenerator.UpdateSettings(shapeSettings);
+       colourGenerator.UpdateSettings(colourSettings);
        if(meshFilters == null || meshFilters.Length == 0){
            meshFilters = new MeshFilter[6];
        }
@@ -40,11 +43,13 @@ public class Planet : MonoBehaviour
             GameObject meshObj = new GameObject("mesh");
            meshObj.transform.parent = transform;
 
-           meshObj.AddComponent<MeshRenderer>().sharedMaterial = new Material(Shader.Find("Standard"));
+           meshObj.AddComponent<MeshRenderer>();
            meshFilters[i] = meshObj.AddComponent<MeshFilter>();
            meshFilters[i].sharedMesh = new Mesh();
 
            }
+            meshFilters[i].GetComponent<MeshRenderer>().sharedMaterial = colourSettings.planetMaterial;
+
            terrainFaces[i] = new TerrainFace(shapeGenerator,meshFilters[i].sharedMesh,resolution,directions[i]);
            bool renderFace = faceRenderMask == FaceRenderMask.All || (int)faceRenderMask -1 == i;
            meshFilters[i].gameObject.SetActive(renderFace);
@@ -61,14 +66,13 @@ public class Planet : MonoBehaviour
 
            }
        }
+
+       colourGenerator.UpdateElevation(shapeGenerator.elevationMinMax);
       
    }
 
     void GenerateColour(){
-        foreach(MeshFilter m in meshFilters){
-            m.GetComponent<MeshRenderer>().sharedMaterial.color = colourSettings.planetColor;
-
-        }
+        colourGenerator.UpdateColours();
     }
 
     public void OnColourSettingsUpdated(){
