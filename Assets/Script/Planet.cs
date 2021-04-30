@@ -107,7 +107,12 @@ public class Planet : MonoBehaviour
 
 
     private void Start() {
-       GeneratePlanet();
+       StartCoroutine(GeneratePlanetAfter1s());
+    }
+
+    IEnumerator GeneratePlanetAfter1s(){
+        yield return new WaitForSeconds(.05f);
+        GeneratePlanet();
     }
 
 
