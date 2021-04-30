@@ -22,13 +22,13 @@ public class Planet : MonoBehaviour
 
     ShapeGenerator shapeGenerator = new ShapeGenerator();
 
-    ColourGenerator colourGenerator = new ColourGenerator();
+    public ColourGenerator colourGenerator = new ColourGenerator();
 
     [SerializeField,HideInInspector]
    MeshFilter[] meshFilters;
    TerrainFace[] terrainFaces;
 
-   void Initialise(){
+   public void Initialise(){
        shapeGenerator.UpdateSettings(shapeSettings);
        colourGenerator.UpdateSettings(colourSettings);
        if(meshFilters == null || meshFilters.Length == 0){
@@ -40,7 +40,7 @@ public class Planet : MonoBehaviour
        for (int i = 0; i < 6; i++)
        {
            if(meshFilters[i]==null){
-            GameObject meshObj = new GameObject("mesh");
+            GameObject meshObj = new GameObject("mesh"+i);
            meshObj.transform.parent = transform;
 
            meshObj.AddComponent<MeshRenderer>();
@@ -71,8 +71,16 @@ public class Planet : MonoBehaviour
       
    }
 
-    void GenerateColour(){
+    public void GenerateColour(){
         colourGenerator.UpdateColours();
+         for (int i = 0; i < 6; i++)
+       {
+           if(meshFilters[i].gameObject.activeSelf){
+           terrainFaces[i].UpdateUvs(colourGenerator);
+
+           }
+       }
+
     }
 
     public void OnColourSettingsUpdated(){
@@ -95,6 +103,11 @@ public class Planet : MonoBehaviour
         Initialise();
         GenerateMesh();
         GenerateColour();
+    }
+
+
+    private void Start() {
+       GeneratePlanet();
     }
 
 
